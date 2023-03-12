@@ -1,0 +1,131 @@
+﻿<div>
+    <div>
+        <h3 class="text-center">Random Quotes Table</h3>
+        <button onclick="getRandomQuote()" class="btn btn-outline-primary float-end mb-2" type="button" >Refresh</button>
+        <table class="table table-striped table-dark">
+            <thead>
+                <tr>
+                    <th class="col-xs-7">Quote</th>
+                    <th class="col-xs-3">Author Name</th>
+                </tr>
+            </thead>
+            <tbody id="randomQuoteTableBody">
+            </tbody>
+        </table>
+        <br />
+        <br />
+        <br />
+    </div>
+
+    <div>
+        <h3 class="text-center">Albert Einstien Grouped Quotes Table</h3>
+        @*<button onclick="getAlbertEinsteinQuotes()" class="btn btn-outline-primary float-end mb-2" type="button">Refresh</button>*@
+        <table class="table table-striped table-dark">
+            <thead>
+                <tr>
+                    <th class="col-xs-7">Quote</th>
+                    <th class="col-xs-3">Quote Group</th>
+                    <th class="col-xs-3">No. of Words</th>
+                </tr>
+            </thead>
+            <tbody id="groupedQuotes">
+            </tbody>
+        </table>
+        <br />
+        <br />
+        <br />
+    </div>
+
+   
+</div>
+@section Scripts
+{
+    <script>
+        $(document).ready(function () {
+            getRandomQuote();
+            getAlbertEinsteinQuotes();
+        });
+
+        function getRandomQuote() {
+            let apiUrl = "https://api.quotable.io/random";
+            $.ajax({
+                url: apiUrl,
+                success: function (data) {
+                    var quote = data.content;
+                    var author = data.author;
+                    var row = `<tr> 
+                           <td>${quote}</td>
+                           <td>${author}</td>
+                           </tr>`;
+                    $("#randomQuoteTableBody tr").empty();
+                    $("#randomQuoteTableBody").append(row);
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error fetching quote: " + error);
+                }
+            });
+        }
+
+        function getAlbertEinsteinQuotes() {
+            let apiUrl = "https://api.quotable.io/quotes?author=Albert+Einstein&limit=30";
+
+            $.ajax({
+                url: apiUrl,
+                success: function (data) {
+                    // Group the quotes by length
+                    let shortQuotes = [];
+                    let mediumQuotes = [];
+                    let longQuotes = [];
+
+                    for (let i = 0; i < data.results.length; i++) {
+                        let quote = data.results[i];
+                        let words = quote.content.split(" ");
+
+                        if (words.length < 10) {
+                            shortQuotes.push(quote);
+                        } else if (words.length >= 10 && words.length <= 20) {
+                            mediumQuotes.push(quote);
+                        } else {
+                            longQuotes.push(quote);
+                        }
+                    }
+
+                    $("#groupedQuotes tr").empty();
+                    for (let i = 0; i < shortQuotes.length; i++) {
+                        let quoteLength = shortQuotes[i].content.split(" ");
+                        let row = `<tr> 
+                           <td> ${shortQuotes[i].content}</td>
+                           <td> Short Quote</td>
+                           <td> ${quoteLength.length }</td>
+                           </tr>`;
+                        $("#groupedQuotes").append(row);
+                    }
+
+                    for (let i = 0; i < mediumQuotes.length; i++) {
+                        let quoteLength = mediumQuotes[i].content.split(" ");
+                        let row = `<tr>
+                           <td> ${mediumQuotes[i].content}</td>
+                           <td> Medium Quote</td>
+                           <td> ${quoteLength.length }</td>
+                           </tr>`;
+                        $("#groupedQuotes").append(row);
+                    }
+
+                    for (let i = 0; i < longQuotes.length; i++) {
+                        let quoteLength = longQuotes[i].content.split(" ");
+                        let row = `<tr>
+                           <td> ${longQuotes[i].content}</td>
+                           <td> Long Quote</td>
+                           <td> ${quoteLength.length }</td>
+                           </tr>`;
+                        $("#groupedQuotes").append(row);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error fetching quotes: " + error);
+                }
+            });
+        }
+
+    </script>
+  }
